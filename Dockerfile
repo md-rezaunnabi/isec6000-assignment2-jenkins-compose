@@ -1,6 +1,10 @@
+# use jenkins lts image with java 17
 FROM jenkins/jenkins:lts-jdk17
+
+# root access for installing required packages
 USER root
 
+# install docker cli for running docker commands from jenkins
 RUN apt-get update && \
     apt-get install -y ca-certificates curl && \
     install -m 0755 -d /etc/apt/keyrings && \
@@ -13,4 +17,5 @@ RUN apt-get update && \
     apt-get install -y docker-ce-cli docker-buildx-plugin && \
     rm -rf /var/lib/apt/lists/*
 
+# switch back to jenkins user after installation
 USER jenkins

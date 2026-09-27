@@ -1,23 +1,33 @@
 services:
 
+  # docker service for jenkins
   docker-dind:
     image: docker:dind
     container_name: docker-dind
+
+    # required for running docker inside container
     privileged: true
 
+    # enable tls for secure docker connection
     environment:
       DOCKER_TLS_CERTDIR: /certs
 
     volumes:
+      # store docker tls certificates
       - docker-certs-ca:/certs/ca
       - docker-certs-client:/certs/client
+
+      # keep docker images and build data
       - docker-data:/var/lib/docker
 
     networks:
-        jenkins-network:
-            aliases:
-              - docker
+      jenkins-network:
+        # docker alias used by jenkins
+        aliases:
+          - docker
 
+
+  # jenkins service for ci/cd pipeline
   jenkins:
     build:
       context: .
@@ -25,30 +35,46 @@ services:
 
     container_name: jenkins
 
+    # access jenkins from local machine
     ports:
       - "127.0.0.1:8080:8080"
 
     environment:
+      # connect jenkins with docker using tls
       DOCKER_HOST: tcp://docker:2376
       DOCKER_TLS_VERIFY: "1"
       DOCKER_CERT_PATH: /certs/client
 
     volumes:
+      # keep jenkins data and jobs
       - jenkins-home:/var/jenkins_home
+
+      # tls certificates for docker connection
       - docker-certs-client:/certs/client:ro
 
     networks:
       - jenkins-network
 
+    # start docker service before jenkins
     depends_on:
       - docker-dind
 
+
+# volumes for keeping data after container restart
 volumes:
+
+  # jenkins data
   jenkins-home:
+
+  # docker tls certificates
   docker-certs-ca:
   docker-certs-client:
+
+  # docker images and build data
   docker-data:
 
+
+# private network for jenkins and docker
 networks:
   jenkins-network:
     driver: bridge
