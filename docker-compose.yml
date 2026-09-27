@@ -19,6 +19,9 @@ services:
 
       # keep docker images and build data
       - docker-data:/var/lib/docker
+      
+      # shares jenkins workspace with docker containers used by the pipeline
+      - jenkins-home:/var/jenkins_home
 
     networks:
       jenkins-network:

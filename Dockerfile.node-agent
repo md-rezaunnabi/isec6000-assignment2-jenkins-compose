@@ -1,0 +1,11 @@
+# get docker cli from the official docker image
+FROM docker:29-cli AS docker-cli
+
+# use node 16 as required for the pipeline build agent
+FROM node:16-bullseye
+
+# copy docker cli into the node 16 image
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
+
+# run pipeline commands as the non-root node user
+USER node
